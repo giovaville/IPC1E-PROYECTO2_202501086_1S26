@@ -8,6 +8,12 @@ package enums;
  *
  * @author Gio
  */
-public class Plataforma {
-    
+public enum Plataforma {
+
+    PC,
+    PLAYSTATION,
+    XBOX,
+    NINTENDO_SWITCH;
+
 }
+

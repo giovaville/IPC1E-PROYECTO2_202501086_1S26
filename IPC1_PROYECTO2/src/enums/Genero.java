@@ -8,6 +8,13 @@ package enums;
  *
  * @author Gio
  */
-public class Genero {
+public enum Genero {
     
+    ACCION,
+    RPG,
+    ESTRATEGIA,
+    DEPORTES,
+    TERROR,
+    AVENTURA;
+
 }

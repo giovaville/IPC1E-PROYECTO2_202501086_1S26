@@ -8,6 +8,11 @@ package enums;
  *
  * @author Gio
  */
-public class Rareza {
-    
+public enum Rareza {
+    COMUN,
+    POCO_COMUN,
+    RARA,
+    ULTRA_RARA,
+    LEGENDARIA;
+
 }

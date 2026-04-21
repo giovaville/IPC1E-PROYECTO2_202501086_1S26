@@ -8,6 +8,13 @@ package enums;
  *
  * @author Gio
  */
-public class TipoCarta {
-    
+public enum TipoCarta {
+    FUEGO,
+    AGUA,
+    PLANTA,
+    ELECTRICO,
+    PSIQUICO,
+    NORMAL,
+    OSCURO,
+    ACERO;
 }
