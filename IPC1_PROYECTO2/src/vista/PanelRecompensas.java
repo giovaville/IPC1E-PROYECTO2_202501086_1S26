@@ -4,23 +4,34 @@
  */
 package vista;
 import controlador.ControlPrincipal;
+import modelo.UsuarioSistema;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.BorderFactory;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Window;
+
 /**
  *
  * @author Gio
  */
 public class PanelRecompensas extends JPanel {
-
     private ControlPrincipal control;
+
     private JLabel lblTitulo;
-    private JLabel lblMensaje;
+    private JLabel lblNivel;
+    private JLabel lblXP;
+    private JLabel lblRango;
+
+    private JPanel panelRecompensas;
+
     private JButton btnRegresar;
 
     public PanelRecompensas(ControlPrincipal control) {
@@ -28,37 +39,65 @@ public class PanelRecompensas extends JPanel {
 
         setLayout(new BorderLayout());
 
-        lblTitulo = new JLabel("RECOMPENSAS", SwingConstants.CENTER);
+        lblTitulo = new JLabel("RECOMPENSAS Y PROGRESO", SwingConstants.CENTER);
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 22));
 
-        lblMensaje = new JLabel("Aquí irá el módulo de recompensas.", SwingConstants.CENTER);
-        lblMensaje.setFont(new Font("Arial", Font.PLAIN, 16));
+        lblNivel = new JLabel();
+        lblXP = new JLabel();
+        lblRango = new JLabel();
+
+        panelRecompensas = new JPanel();
+        panelRecompensas.setLayout(new GridLayout(0, 1, 10, 10));
+        panelRecompensas.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         btnRegresar = new JButton("Regresar al menú");
 
-        JPanel panelCentro = new JPanel();
-        panelCentro.setLayout(new GridLayout(2, 1, 10, 10));
-        panelCentro.add(lblMensaje);
-        panelCentro.add(btnRegresar);
+        JPanel panelSuperior = new JPanel(new GridLayout(3, 1));
+        panelSuperior.add(lblNivel);
+        panelSuperior.add(lblXP);
+        panelSuperior.add(lblRango);
 
         add(lblTitulo, BorderLayout.NORTH);
-        add(panelCentro, BorderLayout.CENTER);
+        add(panelSuperior, BorderLayout.CENTER);
+        add(new JScrollPane(panelRecompensas), BorderLayout.EAST);
+        add(btnRegresar, BorderLayout.SOUTH);
 
-        btnRegresar.addActionListener(e -> {
-            java.awt.Window ventana = javax.swing.SwingUtilities.getWindowAncestor(PanelRecompensas.this);
+        actualizarDatos();
+        mostrarRecompensas();
 
-            if (ventana instanceof VentanaPrincipal) {
-                VentanaPrincipal vp = (VentanaPrincipal) ventana;
-                vp.cambiarPanel(new PanelMenu(control));
-            }
-        });
+        btnRegresar.addActionListener(e -> regresarMenu());
     }
 
-    public ControlPrincipal getControl() {
-        return control;
+    private void actualizarDatos() {
+        UsuarioSistema usuario = control.getUsuarioActual();
+
+        lblNivel.setText("Nivel: " + usuario.getNivel());
+        lblXP.setText("XP: " + usuario.getXp());
+        lblRango.setText("Rango: " + usuario.getRango());
     }
 
-    public JButton getBtnRegresar() {
-        return btnRegresar;
+    private void mostrarRecompensas() {
+        panelRecompensas.removeAll();
+
+        UsuarioSistema usuario = control.getUsuarioActual();
+        int nivel = usuario.getNivel();
+
+        for (int i = 1; i <= nivel; i++) {
+            JLabel recompensa = new JLabel("Recompensa desbloqueada nivel " + i);
+            recompensa.setBorder(BorderFactory.createEtchedBorder());
+            panelRecompensas.add(recompensa);
+        }
+
+        panelRecompensas.revalidate();
+        panelRecompensas.repaint();
+    }
+
+    private void regresarMenu() {
+        Window ventana = SwingUtilities.getWindowAncestor(PanelRecompensas.this);
+
+        if (ventana instanceof VentanaPrincipal) {
+            VentanaPrincipal vp = (VentanaPrincipal) ventana;
+            vp.cambiarPanel(new PanelMenu(control));
+        }
     }
 }

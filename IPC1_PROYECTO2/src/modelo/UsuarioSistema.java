@@ -132,6 +132,7 @@ public class UsuarioSistema {
             rango = "Aprendiz";
         }
     }
+    
 
     @Override
     public String toString() {
