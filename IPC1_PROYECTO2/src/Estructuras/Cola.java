@@ -9,5 +9,59 @@ package Estructuras;
  * @author Gio
  */
 public class Cola {
-    
+    private NodoCola frente;
+    private NodoCola fin;
+    private int tamanio;
+
+    public Cola() {
+        this.frente = null;
+        this.fin = null;
+        this.tamanio = 0;
+    }
+
+    public boolean estaVacia() {
+        return frente == null;
+    }
+
+    public int tamanio() {
+        return tamanio;
+    }
+
+    public void encolar(Object dato) {
+        NodoCola nuevo = new NodoCola(dato);
+
+        if (estaVacia()) {
+            frente = nuevo;
+            fin = nuevo;
+        } else {
+            fin.setSiguiente(nuevo);
+            fin = nuevo;
+        }
+
+        tamanio++;
+    }
+
+    public synchronized Object desencolar() {
+        if (estaVacia()) {
+            return null;
+        }
+
+        Object dato = frente.getDato();
+        frente = frente.getSiguiente();
+
+        if (frente == null) {
+            fin = null;
+        }
+
+        tamanio--;
+        return dato;
+    }
+
+    public Object peek() {
+        if (estaVacia()) {
+            return null;
+        }
+
+        return frente.getDato();
+    }
 }

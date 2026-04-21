@@ -9,18 +9,21 @@ package modelo;
  * @author Gio
  */
 public class ItemCarrito {
-
+    
     private juego juego;
     private int cantidad;
+    private double subtotal;
 
     public ItemCarrito() {
         this.juego = null;
         this.cantidad = 0;
+        this.subtotal = 0.0;
     }
 
     public ItemCarrito(juego juego, int cantidad) {
         this.juego = juego;
         this.cantidad = cantidad;
+        this.subtotal = calcularSubtotal();
     }
 
     public juego getJuego() {
@@ -29,6 +32,7 @@ public class ItemCarrito {
 
     public void setJuego(juego juego) {
         this.juego = juego;
+        this.subtotal = calcularSubtotal();
     }
 
     public int getCantidad() {
@@ -37,33 +41,25 @@ public class ItemCarrito {
 
     public void setCantidad(int cantidad) {
         this.cantidad = cantidad;
+        this.subtotal = calcularSubtotal();
     }
 
     public double getSubtotal() {
+        return subtotal;
+    }
+
+    public double calcularSubtotal() {
         if (juego != null) {
             return juego.getPrecio() * cantidad;
         }
         return 0.0;
     }
 
-    public void aumentarCantidad(int cantidad) {
-        if (cantidad > 0) {
-            this.cantidad += cantidad;
-        }
-    }
-
-    public void disminuirCantidad(int cantidad) {
-        if (cantidad > 0 && this.cantidad >= cantidad) {
-            this.cantidad -= cantidad;
-        }
-    }
-
     @Override
     public String toString() {
         if (juego != null) {
-            return juego.getNombre() + " x" + cantidad + " - Q" + getSubtotal();
+            return juego.getNombre() + " x" + cantidad + " - Q" + subtotal;
         }
         return "Item vacío";
     }
 }
-
