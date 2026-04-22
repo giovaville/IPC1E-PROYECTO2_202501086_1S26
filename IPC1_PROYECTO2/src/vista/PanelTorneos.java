@@ -4,6 +4,7 @@
  */
 package vista;
 import controlador.ControlPrincipal;
+import hilos.HiloTaquilla;
 import modelo.TicketVendido;
 import modelo.Torneo;
 import modelo.juego;
@@ -27,12 +28,18 @@ public class PanelTorneos extends JPanel {
     private JTextField txtNombreUsuario;
     private JButton btnEntrarCola;
     private JButton btnVenderTicket;
+    private JButton btnIniciarTaquillas;
     private JButton btnRegresar;
 
     private DefaultListModel<String> modeloTickets;
     private JList<String> listaTickets;
 
     private JLabel lblCola;
+    private JLabel lblTaquilla1;
+    private JLabel lblTaquilla2;
+
+    private HiloTaquilla taquilla1;
+    private HiloTaquilla taquilla2;
 
     public PanelTorneos(ControlPrincipal control) {
         this.control = control;
@@ -51,25 +58,34 @@ public class PanelTorneos extends JPanel {
         txtNombreUsuario = new JTextField();
         btnEntrarCola = new JButton("Entrar a la cola");
         btnVenderTicket = new JButton("Vender ticket");
+        btnIniciarTaquillas = new JButton("Iniciar taquillas");
         btnRegresar = new JButton("Regresar al menú");
 
         lblCola = new JLabel("Siguiente en cola: Nadie", SwingConstants.CENTER);
+        lblTaquilla1 = new JLabel("Taquilla 1 libre", SwingConstants.CENTER);
+        lblTaquilla2 = new JLabel("Taquilla 2 libre", SwingConstants.CENTER);
 
         JPanel panelCentro = new JPanel(new GridLayout(1, 2, 10, 10));
         panelCentro.add(new JScrollPane(listaTorneos));
         panelCentro.add(new JScrollPane(listaTickets));
 
-        JPanel panelInferior = new JPanel(new GridLayout(5, 1, 10, 10));
+        JPanel panelInferior = new JPanel(new GridLayout(7, 1, 10, 10));
         panelInferior.add(new JLabel("Nombre del usuario:"));
         panelInferior.add(txtNombreUsuario);
         panelInferior.add(lblCola);
+        panelInferior.add(lblTaquilla1);
+        panelInferior.add(lblTaquilla2);
         panelInferior.add(btnEntrarCola);
         panelInferior.add(btnVenderTicket);
+
+        JPanel panelEste = new JPanel(new GridLayout(2, 1, 10, 10));
+        panelEste.add(btnIniciarTaquillas);
+        panelEste.add(btnRegresar);
 
         add(lblTitulo, BorderLayout.NORTH);
         add(panelCentro, BorderLayout.CENTER);
         add(panelInferior, BorderLayout.SOUTH);
-        add(btnRegresar, BorderLayout.EAST);
+        add(panelEste, BorderLayout.EAST);
 
         cargarTorneosPruebaSiHaceFalta();
         actualizarListaTorneos();
@@ -77,24 +93,28 @@ public class PanelTorneos extends JPanel {
         actualizarEstadoCola();
 
         btnEntrarCola.addActionListener(e -> entrarACola());
-        btnVenderTicket.addActionListener(e -> venderTicket());
+        btnVenderTicket.addActionListener(e -> venderTicketManual());
+        btnIniciarTaquillas.addActionListener(e -> iniciarTaquillas());
         btnRegresar.addActionListener(e -> regresarMenu());
     }
 
     private void cargarTorneosPruebaSiHaceFalta() {
         if (control.getControlTorneos().getListaTorneos().estaVacia()) {
             control.getControlTorneos().agregarTorneo(
-                    new Torneo("T001", "Copa FIFA", new juego("J001", "FIFA 23", Genero.DEPORTES, 300, Plataforma.PC, 5, "Fútbol"),
+                    new Torneo("T001", "Copa FIFA",
+                            new juego("J001", "FIFA 23", Genero.DEPORTES, 300, Plataforma.PC, 5, "Fútbol"),
                             "25/04/2026", "15:00", 50.0, 10)
             );
 
             control.getControlTorneos().agregarTorneo(
-                    new Torneo("T002", "Battle Royale", new juego("J002", "Fortnite", Genero.ACCION, 0, Plataforma.XBOX, 10, "Shooter"),
+                    new Torneo("T002", "Battle Royale",
+                            new juego("J002", "Fortnite", Genero.ACCION, 0, Plataforma.XBOX, 10, "Shooter"),
                             "26/04/2026", "18:00", 35.0, 8)
             );
 
             control.getControlTorneos().agregarTorneo(
-                    new Torneo("T003", "Liga Estratégica", new juego("J003", "Age of Empires", Genero.ESTRATEGIA, 250, Plataforma.PC, 6, "Estrategia"),
+                    new Torneo("T003", "Liga Estratégica",
+                            new juego("J003", "Age of Empires", Genero.ESTRATEGIA, 250, Plataforma.PC, 6, "Estrategia"),
                             "27/04/2026", "14:00", 40.0, 6)
             );
         }
@@ -157,7 +177,7 @@ public class PanelTorneos extends JPanel {
         }
     }
 
-    private void venderTicket() {
+    private void venderTicketManual() {
         Torneo torneo = obtenerTorneoSeleccionado();
 
         if (torneo == null) {
@@ -177,6 +197,59 @@ public class PanelTorneos extends JPanel {
         }
     }
 
+    private void iniciarTaquillas() {
+        Torneo torneo = obtenerTorneoSeleccionado();
+
+        if (torneo == null) {
+            JOptionPane.showMessageDialog(this, "Selecciona un torneo.");
+            return;
+        }
+
+        if (!control.getControlTorneos().hayUsuariosEnCola()) {
+            JOptionPane.showMessageDialog(this, "No hay usuarios en la cola.");
+            return;
+        }
+
+        detenerTaquillasSiExisten();
+
+        Runnable actualizador = () -> {
+            actualizarListaTorneos();
+            actualizarListaTickets();
+            actualizarEstadoCola();
+        };
+
+        taquilla1 = new HiloTaquilla(
+                "Taquilla 1",
+                control.getControlTorneos(),
+                torneo,
+                control.getUsuarioActual(),
+                lblTaquilla1,
+                actualizador
+        );
+
+        taquilla2 = new HiloTaquilla(
+                "Taquilla 2",
+                control.getControlTorneos(),
+                torneo,
+                control.getUsuarioActual(),
+                lblTaquilla2,
+                actualizador
+        );
+
+        taquilla1.start();
+        taquilla2.start();
+    }
+
+    private void detenerTaquillasSiExisten() {
+        if (taquilla1 != null && taquilla1.isAlive()) {
+            taquilla1.detenerTaquilla();
+        }
+
+        if (taquilla2 != null && taquilla2.isAlive()) {
+            taquilla2.detenerTaquilla();
+        }
+    }
+
     private void actualizarEstadoCola() {
         String siguiente = control.getControlTorneos().verSiguienteEnCola();
 
@@ -188,6 +261,8 @@ public class PanelTorneos extends JPanel {
     }
 
     private void regresarMenu() {
+        detenerTaquillasSiExisten();
+
         Window ventana = SwingUtilities.getWindowAncestor(PanelTorneos.this);
 
         if (ventana instanceof VentanaPrincipal) {

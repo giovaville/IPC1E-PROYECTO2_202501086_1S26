@@ -99,6 +99,23 @@ public class ListaSimple {
 
         return false;
     }
+    public void set(int indice, Object dato) {
+    if (indice < 0 || indice >= tamanio) {
+        return;
+    }
+
+    NodoSimple actual = cabeza;
+    int contador = 0;
+
+    while (actual != null) {
+        if (contador == indice) {
+            actual.setDato(dato);
+            return;
+        }
+        actual = actual.getSiguiente();
+        contador++;
+    }
+}
 
     public void limpiar() {
         cabeza = null;

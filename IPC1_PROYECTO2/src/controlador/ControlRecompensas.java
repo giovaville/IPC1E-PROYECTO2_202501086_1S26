@@ -12,79 +12,112 @@ import modelo.UsuarioSistema;
  */
 public class ControlRecompensas {
     private ListaSimple leaderboard;
+    private ListaSimple logrosDisponibles;
 
     public ControlRecompensas() {
         this.leaderboard = new ListaSimple();
+        this.logrosDisponibles = new ListaSimple();
+        inicializarLogros();
     }
 
     public ListaSimple getLeaderboard() {
         return leaderboard;
     }
 
+    public ListaSimple getLogrosDisponibles() {
+        return logrosDisponibles;
+    }
+
     public void agregarUsuarioAlLeaderboard(UsuarioSistema usuario) {
-        if (usuario != null) {
+        if (usuario != null && !existeEnLeaderboard(usuario.getNombre())) {
             leaderboard.agregarAlFinal(usuario);
         }
     }
 
-    public void otorgarXpPorCompra(UsuarioSistema usuario, int cantidadJuegos) {
-        if (usuario != null && cantidadJuegos > 0) {
-            usuario.agregarXp(cantidadJuegos * 50);
+    public void otorgarXp(UsuarioSistema usuario, int cantidad) {
+        if (usuario != null && cantidad > 0) {
+            usuario.agregarXp(cantidad);
+            verificarLogros(usuario);
+            agregarUsuarioAlLeaderboard(usuario);
+            ordenarLeaderboardPorXp();
         }
     }
 
-    public void otorgarXpPorFilaCompleta(UsuarioSistema usuario) {
-        if (usuario != null) {
-            usuario.agregarXp(100);
+    private void inicializarLogros() {
+        logrosDisponibles.agregarAlFinal(new Logro("Primer paso", "Alcanza 100 XP"));
+        logrosDisponibles.agregarAlFinal(new Logro("Jugador activo", "Alcanza 500 XP"));
+        logrosDisponibles.agregarAlFinal(new Logro("Veterano", "Alcanza 1500 XP"));
+        logrosDisponibles.agregarAlFinal(new Logro("Maestro", "Alcanza 3500 XP"));
+        logrosDisponibles.agregarAlFinal(new Logro("Leyenda", "Alcanza 7000 XP"));
+        logrosDisponibles.agregarAlFinal(new Logro("Comprador", "Realiza tu primera compra"));
+        logrosDisponibles.agregarAlFinal(new Logro("Competidor", "Participa en un torneo"));
+        logrosDisponibles.agregarAlFinal(new Logro("Coleccionista", "Obtén 5 cartas"));
+    }
+
+    public void registrarLogroManual(UsuarioSistema usuario, String nombreLogro) {
+        if (usuario == null || nombreLogro == null || nombreLogro.trim().isEmpty()) {
+            return;
+        }
+
+        for (int i = 0; i < logrosDisponibles.size(); i++) {
+            Logro logro = (Logro) logrosDisponibles.obtener(i);
+
+            if (logro != null && logro.getNombre().equalsIgnoreCase(nombreLogro.trim())) {
+                if (!usuarioYaTieneLogro(usuario, logro)) {
+                    usuario.agregarLogro(new Logro(logro.getNombre(), logro.getDescripcion()));
+                }
+                return;
+            }
         }
     }
 
-    public void otorgarXpPorCartaLegendaria(UsuarioSistema usuario) {
-        if (usuario != null) {
-            usuario.agregarXp(200);
+    private void verificarLogros(UsuarioSistema usuario) {
+        int xp = usuario.getXp();
+
+        for (int i = 0; i < logrosDisponibles.size(); i++) {
+            Logro logro = (Logro) logrosDisponibles.obtener(i);
+
+            if (logro != null && !usuarioYaTieneLogro(usuario, logro)) {
+
+                if (logro.getNombre().equals("Primer paso") && xp >= 100) {
+                    usuario.agregarLogro(new Logro(logro.getNombre(), logro.getDescripcion()));
+                } else if (logro.getNombre().equals("Jugador activo") && xp >= 500) {
+                    usuario.agregarLogro(new Logro(logro.getNombre(), logro.getDescripcion()));
+                } else if (logro.getNombre().equals("Veterano") && xp >= 1500) {
+                    usuario.agregarLogro(new Logro(logro.getNombre(), logro.getDescripcion()));
+                } else if (logro.getNombre().equals("Maestro") && xp >= 3500) {
+                    usuario.agregarLogro(new Logro(logro.getNombre(), logro.getDescripcion()));
+                } else if (logro.getNombre().equals("Leyenda") && xp >= 7000) {
+                    usuario.agregarLogro(new Logro(logro.getNombre(), logro.getDescripcion()));
+                }
+            }
         }
     }
 
-    public void otorgarXpPorInscripcionTorneo(UsuarioSistema usuario) {
-        if (usuario != null) {
-            usuario.agregarXp(150);
-        }
-    }
+    private boolean usuarioYaTieneLogro(UsuarioSistema usuario, Logro logro) {
+        ListaSimple logrosUsuario = usuario.getLogros();
 
-    public void otorgarXpPorInicioSesion(UsuarioSistema usuario) {
-        if (usuario != null) {
-            usuario.agregarXp(10);
-        }
-    }
+        for (int i = 0; i < logrosUsuario.size(); i++) {
+            Logro actual = (Logro) logrosUsuario.obtener(i);
 
-    public void registrarLogro(UsuarioSistema usuario, Logro logro) {
-        if (usuario != null && logro != null) {
-            usuario.agregarLogro(logro);
-        }
-    }
-
-    public void desbloquearLogro(Logro logro) {
-        if (logro != null) {
-            logro.setDesbloqueado(true);
-        }
-    }
-
-    public Logro buscarLogroPorNombre(UsuarioSistema usuario, String nombre) {
-        if (usuario == null || nombre == null || nombre.trim().isEmpty()) {
-            return null;
-        }
-
-        ListaSimple logros = usuario.getLogros();
-
-        for (int i = 0; i < logros.size(); i++) {
-            Logro logro = (Logro) logros.obtener(i);
-
-            if (logro != null && logro.getNombre().equalsIgnoreCase(nombre.trim())) {
-                return logro;
+            if (actual != null && actual.getNombre().equalsIgnoreCase(logro.getNombre())) {
+                return true;
             }
         }
 
-        return null;
+        return false;
+    }
+
+    private boolean existeEnLeaderboard(String nombreUsuario) {
+        for (int i = 0; i < leaderboard.size(); i++) {
+            UsuarioSistema usuario = (UsuarioSistema) leaderboard.obtener(i);
+
+            if (usuario != null && usuario.getNombre().equalsIgnoreCase(nombreUsuario)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void ordenarLeaderboardPorXp() {
@@ -96,63 +129,15 @@ public class ControlRecompensas {
                 UsuarioSistema siguiente = (UsuarioSistema) leaderboard.obtener(j + 1);
 
                 if (actual != null && siguiente != null && actual.getXp() < siguiente.getXp()) {
-                    intercambiarUsuarios(j, j + 1);
+                    intercambiar(j, j + 1);
                 }
             }
         }
     }
 
-    private void intercambiarUsuarios(int indice1, int indice2) {
-        UsuarioSistema usuario1 = (UsuarioSistema) leaderboard.obtener(indice1);
-        UsuarioSistema usuario2 = (UsuarioSistema) leaderboard.obtener(indice2);
-
-        if (usuario1 == null || usuario2 == null) {
-            return;
-        }
-
-        NodoTemporal nodo1 = obtenerNodoTemporal(indice1);
-        NodoTemporal nodo2 = obtenerNodoTemporal(indice2);
-
-        if (nodo1 != null && nodo2 != null) {
-            nodo1.setDato(usuario2);
-            nodo2.setDato(usuario1);
-        }
-    }
-
-    private NodoTemporal obtenerNodoTemporal(int indice) {
-        if (indice < 0 || indice >= leaderboard.size()) {
-            return null;
-        }
-
-        return new NodoTemporal(leaderboard, indice);
-    }
-
-    private class NodoTemporal {
-
-        private ListaSimple lista;
-        private int indice;
-
-        public NodoTemporal(ListaSimple lista, int indice) {
-            this.lista = lista;
-            this.indice = indice;
-        }
-
-        public void setDato(Object dato) {
-            if (lista == null || indice < 0 || indice >= lista.size()) {
-                return;
-            }
-
-            Estructuras.NodoSimple auxiliar = lista.getCabeza();
-            int contador = 0;
-
-            while (auxiliar != null) {
-                if (contador == indice) {
-                    auxiliar.setDato(dato);
-                    return;
-                }
-                auxiliar = auxiliar.getSiguiente();
-                contador++;
-            }
-        }
+    private void intercambiar(int i, int j) {
+        Object temp = leaderboard.obtener(i);
+        leaderboard.set(i, leaderboard.obtener(j));
+        leaderboard.set(j, temp);
     }
 }

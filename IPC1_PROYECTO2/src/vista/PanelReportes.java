@@ -4,61 +4,101 @@
  */
 package vista;
 import controlador.ControlPrincipal;
+import controlador.ControlReportes;
+import Estructuras.ListaSimple;
+import modelo.Carta;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Window;
 /**
  *
  * @author Gio
  */
 public class PanelReportes extends JPanel {
-
     private ControlPrincipal control;
+    private ControlReportes controlReportes;
+
     private JLabel lblTitulo;
-    private JLabel lblMensaje;
+
+    private JButton btnReporteCompras;
+    private JButton btnReporteAlbum;
+    private JButton btnReporteTickets;
+    private JButton btnReporteLeaderboard;
     private JButton btnRegresar;
 
     public PanelReportes(ControlPrincipal control) {
         this.control = control;
+        this.controlReportes = new ControlReportes();
 
         setLayout(new BorderLayout());
 
         lblTitulo = new JLabel("REPORTES", SwingConstants.CENTER);
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 22));
 
-        lblMensaje = new JLabel("Aquí irá el módulo de reportes.", SwingConstants.CENTER);
-        lblMensaje.setFont(new Font("Arial", Font.PLAIN, 16));
-
+        btnReporteCompras = new JButton("Reporte de Compras");
+        btnReporteAlbum = new JButton("Reporte de Álbum");
+        btnReporteTickets = new JButton("Reporte de Tickets");
+        btnReporteLeaderboard = new JButton("Reporte de Leaderboard");
         btnRegresar = new JButton("Regresar al menú");
 
-        JPanel panelCentro = new JPanel();
-        panelCentro.setLayout(new GridLayout(2, 1, 10, 10));
-        panelCentro.add(lblMensaje);
-        panelCentro.add(btnRegresar);
+        JPanel panelBotones = new JPanel();
+        panelBotones.setLayout(new GridLayout(5, 1, 10, 10));
+
+        panelBotones.add(btnReporteCompras);
+        panelBotones.add(btnReporteAlbum);
+        panelBotones.add(btnReporteTickets);
+        panelBotones.add(btnReporteLeaderboard);
+        panelBotones.add(btnRegresar);
 
         add(lblTitulo, BorderLayout.NORTH);
-        add(panelCentro, BorderLayout.CENTER);
+        add(panelBotones, BorderLayout.CENTER);
 
-        btnRegresar.addActionListener(e -> {
-            java.awt.Window ventana = javax.swing.SwingUtilities.getWindowAncestor(PanelReportes.this);
-
-            if (ventana instanceof VentanaPrincipal) {
-                VentanaPrincipal vp = (VentanaPrincipal) ventana;
-                vp.cambiarPanel(new PanelMenu(control));
-            }
-        });
+        btnReporteCompras.addActionListener(e -> generarReporteCompras());
+        btnReporteAlbum.addActionListener(e -> generarReporteAlbum());
+        btnReporteTickets.addActionListener(e -> generarReporteTickets());
+        btnReporteLeaderboard.addActionListener(e -> generarReporteLeaderboard());
+        btnRegresar.addActionListener(e -> regresarMenu());
     }
 
-    public ControlPrincipal getControl() {
-        return control;
+    private void generarReporteCompras() {
+        ListaSimple compras = control.getUsuarioActual().getCompras();
+        controlReportes.generarReporteCompras(compras);
     }
 
-    public JButton getBtnRegresar() {
-        return btnRegresar;
+    private void generarReporteAlbum() {
+        ListaSimple cartas = new ListaSimple();
+
+        if (control != null) {
+            // Si tienes acceso real al álbum, luego lo reemplazas
+            // Por ahora lista vacía evita errores
+        }
+
+        controlReportes.generarReporteAlbum(cartas);
+    }
+
+    private void generarReporteTickets() {
+        ListaSimple tickets = control.getControlTorneos().getTicketsVendidos();
+        controlReportes.generarReporteTickets(tickets);
+    }
+
+    private void generarReporteLeaderboard() {
+        ListaSimple usuarios = control.getControlRecompensas().getLeaderboard();
+        controlReportes.generarReporteLeaderboard(usuarios);
+    }
+
+    private void regresarMenu() {
+        Window ventana = SwingUtilities.getWindowAncestor(PanelReportes.this);
+
+        if (ventana instanceof VentanaPrincipal) {
+            VentanaPrincipal vp = (VentanaPrincipal) ventana;
+            vp.cambiarPanel(new PanelMenu(control));
+        }
     }
 }
