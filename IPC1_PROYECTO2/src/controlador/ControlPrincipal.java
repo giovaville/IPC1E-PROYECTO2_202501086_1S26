@@ -13,6 +13,8 @@ public class ControlPrincipal {
     private ControlTorneos controlTorneos;
     private ControlRecompensas controlRecompensas;
     private ControlEstudiante controlEstudiante;
+    private ControlAlbum controlAlbum;
+    private ControlReportes controlReportes;
     private UsuarioSistema usuarioActual;
 
     public ControlPrincipal() {
@@ -20,6 +22,8 @@ public class ControlPrincipal {
         this.controlTorneos = new ControlTorneos();
         this.controlRecompensas = new ControlRecompensas();
         this.controlEstudiante = new ControlEstudiante();
+        this.controlAlbum = new ControlAlbum();
+        this.controlReportes = new ControlReportes();
         this.usuarioActual = new UsuarioSistema("Jugador");
     }
 
@@ -39,6 +43,14 @@ public class ControlPrincipal {
         return controlEstudiante;
     }
 
+    public ControlAlbum getControlAlbum() {
+        return controlAlbum;
+    }
+
+    public ControlReportes getControlReportes() {
+        return controlReportes;
+    }
+
     public UsuarioSistema getUsuarioActual() {
         return usuarioActual;
     }
@@ -48,6 +60,6 @@ public class ControlPrincipal {
     }
 
     public void inicializarSistema() {
-        // Aquí puedes cargar datos iniciales si quieres después
+        controlRecompensas.agregarUsuarioAlLeaderboard(usuarioActual);
     }
 }

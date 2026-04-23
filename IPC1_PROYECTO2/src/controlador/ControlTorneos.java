@@ -124,6 +124,31 @@ public class ControlTorneos {
         return ticketsVendidos.size();
     }
 
+    public ListaSimple obtenerTicketsPorTorneo(String idTorneo) {
+        ListaSimple ticketsFiltrados = new ListaSimple();
+
+        if (idTorneo == null || idTorneo.trim().isEmpty()) {
+            return ticketsFiltrados;
+        }
+
+        for (int i = 0; i < ticketsVendidos.size(); i++) {
+            TicketVendido ticket = (TicketVendido) ticketsVendidos.obtener(i);
+
+            if (ticket != null && ticket.getTorneo() != null &&
+                ticket.getTorneo().getIdTorneo().equalsIgnoreCase(idTorneo.trim())) {
+                ticketsFiltrados.agregarAlFinal(ticket);
+            }
+        }
+
+        return ticketsFiltrados;
+    }
+
+    public void limpiarCola() {
+        while (!colaEspera.estaVacia()) {
+            colaEspera.desencolar();
+        }
+    }
+
     private String generarIdTicket() {
         return "TICKET-" + System.currentTimeMillis();
     }

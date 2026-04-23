@@ -50,6 +50,7 @@ public class ControlTienda {
 
         for (int i = 0; i < catalogo.size(); i++) {
             juego actual = (juego) catalogo.obtener(i);
+
             if (actual != null && actual.getCodigo().equalsIgnoreCase(codigo.trim())) {
                 return actual;
             }
@@ -65,12 +66,49 @@ public class ControlTienda {
 
         for (int i = 0; i < catalogo.size(); i++) {
             juego actual = (juego) catalogo.obtener(i);
+
             if (actual != null && actual.getNombre().equalsIgnoreCase(nombre.trim())) {
                 return actual;
             }
         }
 
         return null;
+    }
+
+    public ListaSimple filtrarPorGenero(String genero) {
+        ListaSimple filtrados = new ListaSimple();
+
+        if (genero == null || genero.trim().isEmpty()) {
+            return filtrados;
+        }
+
+        for (int i = 0; i < catalogo.size(); i++) {
+            juego actual = (juego) catalogo.obtener(i);
+
+            if (actual != null && actual.getGenero().name().equalsIgnoreCase(genero.trim())) {
+                filtrados.agregarAlFinal(actual);
+            }
+        }
+
+        return filtrados;
+    }
+
+    public ListaSimple filtrarPorPlataforma(String plataforma) {
+        ListaSimple filtrados = new ListaSimple();
+
+        if (plataforma == null || plataforma.trim().isEmpty()) {
+            return filtrados;
+        }
+
+        for (int i = 0; i < catalogo.size(); i++) {
+            juego actual = (juego) catalogo.obtener(i);
+
+            if (actual != null && actual.getPlataforma().name().equalsIgnoreCase(plataforma.trim())) {
+                filtrados.agregarAlFinal(actual);
+            }
+        }
+
+        return filtrados;
     }
 
     public boolean agregarAlCarrito(juego juego, int cantidad) {
@@ -93,8 +131,7 @@ public class ControlTienda {
 
             itemExistente.setCantidad(nuevaCantidad);
         } else {
-            ItemCarrito nuevoItem = new ItemCarrito(juego, cantidad);
-            carrito.agregarAlFinal(nuevoItem);
+            carrito.agregarAlFinal(new ItemCarrito(juego, cantidad));
         }
 
         return true;
@@ -108,13 +145,28 @@ public class ControlTienda {
         for (int i = 0; i < carrito.size(); i++) {
             ItemCarrito item = (ItemCarrito) carrito.obtener(i);
 
-            if (item != null && item.getJuego() != null
-                    && item.getJuego().getCodigo().equalsIgnoreCase(codigoJuego.trim())) {
+            if (item != null && item.getJuego() != null &&
+                item.getJuego().getCodigo().equalsIgnoreCase(codigoJuego.trim())) {
                 return item;
             }
         }
 
         return null;
+    }
+
+    public boolean actualizarCantidadCarrito(String codigoJuego, int nuevaCantidad) {
+        ItemCarrito item = buscarItemEnCarrito(codigoJuego);
+
+        if (item == null || item.getJuego() == null || nuevaCantidad <= 0) {
+            return false;
+        }
+
+        if (!item.getJuego().tieneStockSuficiente(nuevaCantidad)) {
+            return false;
+        }
+
+        item.setCantidad(nuevaCantidad);
+        return true;
     }
 
     public boolean eliminarDelCarrito(int indice) {
@@ -126,6 +178,7 @@ public class ControlTienda {
 
         for (int i = 0; i < carrito.size(); i++) {
             ItemCarrito item = (ItemCarrito) carrito.obtener(i);
+
             if (item != null) {
                 total += item.getSubtotal();
             }
@@ -168,9 +221,7 @@ public class ControlTienda {
 
         historial.agregarAlInicio(nuevaCompra);
         usuario.agregarCompra(nuevaCompra);
-
-        int xpGanada = contarJuegosComprados(nuevaCompra) * 50;
-        usuario.agregarXp(xpGanada);
+        usuario.agregarXp(contarJuegosComprados(nuevaCompra) * 50);
 
         carrito.limpiar();
 
@@ -186,6 +237,7 @@ public class ControlTienda {
 
         for (int i = 0; i < compra.getDetalles().size(); i++) {
             DetalleCompra detalle = (DetalleCompra) compra.getDetalles().obtener(i);
+
             if (detalle != null) {
                 totalJuegos += detalle.getCantidad();
             }
