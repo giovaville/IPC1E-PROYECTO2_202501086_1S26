@@ -9,7 +9,6 @@ package modelo;
  * @author Gio
  */
 public class DetalleCompra {
-
     private juego juego;
     private int cantidad;
     private double subtotal;
@@ -48,12 +47,8 @@ public class DetalleCompra {
         return subtotal;
     }
 
-    public void setSubtotal(double subtotal) {
-        this.subtotal = subtotal;
-    }
-
     public double calcularSubtotal() {
-        if (juego != null) {
+        if (juego != null && cantidad > 0) {
             return juego.getPrecio() * cantidad;
         }
         return 0.0;

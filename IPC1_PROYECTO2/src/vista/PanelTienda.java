@@ -4,13 +4,12 @@
  */
 package vista;
 import controlador.ControlPrincipal;
+import Estructuras.ListaSimple;
 import modelo.Compra;
 import modelo.ItemCarrito;
-import modelo.UsuarioSistema;
 import modelo.juego;
 import enums.Genero;
 import enums.Plataforma;
-import Estructuras.ListaSimple;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,6 +27,7 @@ public class PanelTienda extends JPanel {
     private JList<String> listaCarrito;
     private JLabel lblTotal;
     private JButton btnComprar;
+    private JButton btnEliminarSeleccionado;
     private JButton btnRegresar;
 
     public PanelTienda(ControlPrincipal control) {
@@ -50,15 +50,17 @@ public class PanelTienda extends JPanel {
         lblTotal.setFont(new Font("Arial", Font.BOLD, 16));
 
         btnComprar = new JButton("Confirmar compra");
+        btnEliminarSeleccionado = new JButton("Eliminar seleccionado");
         btnRegresar = new JButton("Regresar al menú");
 
         panelDerecho = new JPanel();
         panelDerecho.setLayout(new BorderLayout());
 
         JPanel panelBotones = new JPanel();
-        panelBotones.setLayout(new GridLayout(3, 1, 10, 10));
+        panelBotones.setLayout(new GridLayout(4, 1, 10, 10));
         panelBotones.add(lblTotal);
         panelBotones.add(btnComprar);
+        panelBotones.add(btnEliminarSeleccionado);
         panelBotones.add(btnRegresar);
 
         panelDerecho.add(new JLabel("CARRITO", SwingConstants.CENTER), BorderLayout.NORTH);
@@ -74,6 +76,7 @@ public class PanelTienda extends JPanel {
         actualizarCarritoVisual();
 
         btnComprar.addActionListener(e -> confirmarCompra());
+        btnEliminarSeleccionado.addActionListener(e -> eliminarSeleccionado());
 
         btnRegresar.addActionListener(e -> {
             Window ventana = SwingUtilities.getWindowAncestor(PanelTienda.this);
@@ -149,16 +152,42 @@ public class PanelTienda extends JPanel {
     }
 
     private void confirmarCompra() {
-        UsuarioSistema usuario = control.getUsuarioActual();
-
-        Compra compra = control.getControlTienda().confirmarCompra(usuario);
+        Compra compra = control.getControlTienda().confirmarCompra(control.getUsuarioActual());
 
         if (compra != null) {
+            control.getControlRecompensas().otorgarXp(
+                    control.getUsuarioActual(),
+                    0
+            );
+            control.getControlRecompensas().registrarLogroManual(
+                    control.getUsuarioActual(),
+                    "Comprador"
+            );
+
             actualizarCarritoVisual();
             cargarCatalogoVisual();
+
             JOptionPane.showMessageDialog(this, "Compra realizada con éxito.\n" + compra.toString());
         } else {
             JOptionPane.showMessageDialog(this, "No se pudo realizar la compra.");
+        }
+    }
+
+    private void eliminarSeleccionado() {
+        int indice = listaCarrito.getSelectedIndex();
+
+        if (indice < 0) {
+            JOptionPane.showMessageDialog(this, "Selecciona un elemento del carrito.");
+            return;
+        }
+
+        boolean eliminado = control.getControlTienda().eliminarDelCarrito(indice);
+
+        if (eliminado) {
+            actualizarCarritoVisual();
+            JOptionPane.showMessageDialog(this, "Elemento eliminado del carrito.");
+        } else {
+            JOptionPane.showMessageDialog(this, "No se pudo eliminar el elemento.");
         }
     }
 }

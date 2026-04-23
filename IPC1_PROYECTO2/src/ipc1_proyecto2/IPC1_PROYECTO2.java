@@ -4,7 +4,14 @@
  */
 package ipc1_proyecto2;
 import controlador.ControlPrincipal;
-import vista.*;
+import vista.PanelAlbum;
+import vista.PanelEstudiante;
+import vista.PanelMenu;
+import vista.PanelRecompensas;
+import vista.PanelReportes;
+import vista.PanelTienda;
+import vista.PanelTorneos;
+import vista.VentanaPrincipal;
 
 import javax.swing.SwingUtilities;
 /**
@@ -20,37 +27,37 @@ public class IPC1_PROYECTO2 {
         SwingUtilities.invokeLater(() -> {
 
             ControlPrincipal control = new ControlPrincipal();
+            control.inicializarSistema();
 
             VentanaPrincipal ventana = new VentanaPrincipal(control);
-
             PanelMenu menu = new PanelMenu(control);
 
             menu.getBtnTienda().addActionListener(e ->
-                ventana.cambiarPanel(new PanelTienda(control))
+                    ventana.cambiarPanel(new PanelTienda(control))
             );
 
             menu.getBtnAlbum().addActionListener(e ->
-                ventana.cambiarPanel(new PanelAlbum(control))
+                    ventana.cambiarPanel(new PanelAlbum(control))
             );
 
             menu.getBtnTorneos().addActionListener(e ->
-                ventana.cambiarPanel(new PanelTorneos(control))
+                    ventana.cambiarPanel(new PanelTorneos(control))
             );
 
             menu.getBtnRecompensas().addActionListener(e ->
-                ventana.cambiarPanel(new PanelRecompensas(control))
+                    ventana.cambiarPanel(new PanelRecompensas(control))
             );
 
             menu.getBtnReportes().addActionListener(e ->
-                ventana.cambiarPanel(new PanelReportes(control))
+                    ventana.cambiarPanel(new PanelReportes(control))
             );
 
             menu.getBtnEstudiante().addActionListener(e ->
-                ventana.cambiarPanel(new PanelEstudiante(control))
+                    ventana.cambiarPanel(new PanelEstudiante(control))
             );
 
             menu.getBtnSalir().addActionListener(e ->
-                System.exit(0)
+                    System.exit(0)
             );
 
             ventana.cambiarPanel(menu);

@@ -22,7 +22,7 @@ public class Logro {
     public Logro(String nombre, String descripcion) {
         this.nombre = nombre;
         this.descripcion = descripcion;
-        this.desbloqueado = false;
+        this.desbloqueado = true;
     }
 
     public String getNombre() {
@@ -51,6 +51,6 @@ public class Logro {
 
     @Override
     public String toString() {
-        return nombre + " - " + (desbloqueado ? "Desbloqueado" : "Bloqueado");
+        return nombre + " - " + descripcion;
     }
 }

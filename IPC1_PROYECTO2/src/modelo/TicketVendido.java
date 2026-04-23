@@ -74,15 +74,12 @@ public class TicketVendido {
 
     @Override
     public String toString() {
-        String nombreTorneo = "Sin torneo";
+        String nombreTorneo = (torneo != null) ? torneo.getNombre() : "Sin torneo";
 
-        if (torneo != null) {
-            nombreTorneo = torneo.getNombre();
-        }
-
-        return idTicket + " - " + nombreTorneo
-                + " - " + nombreComprador
-                + " - Q" + precio
-                + " - " + fechaCompra;
+        return idTicket + " | " +
+               nombreTorneo + " | " +
+               nombreComprador + " | Q" +
+               precio + " | " +
+               fechaCompra;
     }
 }

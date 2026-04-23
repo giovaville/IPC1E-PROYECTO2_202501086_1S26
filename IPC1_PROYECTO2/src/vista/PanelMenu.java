@@ -11,12 +11,13 @@ import javax.swing.JPanel;
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.Window;
+import javax.swing.SwingUtilities;
 /**
  *
  * @author Gio
  */
 public class PanelMenu extends JPanel {
-
     private ControlPrincipal control;
     private JLabel lblTitulo;
     private JButton btnTienda;
@@ -56,6 +57,23 @@ public class PanelMenu extends JPanel {
 
         add(lblTitulo, BorderLayout.NORTH);
         add(panelBotones, BorderLayout.CENTER);
+
+        btnTienda.addActionListener(e -> abrirPanel(new PanelTienda(control)));
+        btnAlbum.addActionListener(e -> abrirPanel(new PanelAlbum(control)));
+        btnTorneos.addActionListener(e -> abrirPanel(new PanelTorneos(control)));
+        btnRecompensas.addActionListener(e -> abrirPanel(new PanelRecompensas(control)));
+        btnReportes.addActionListener(e -> abrirPanel(new PanelReportes(control)));
+        btnEstudiante.addActionListener(e -> abrirPanel(new PanelEstudiante(control)));
+        btnSalir.addActionListener(e -> System.exit(0));
+    }
+
+    private void abrirPanel(JPanel panel) {
+        Window ventana = SwingUtilities.getWindowAncestor(this);
+
+        if (ventana instanceof VentanaPrincipal) {
+            VentanaPrincipal vp = (VentanaPrincipal) ventana;
+            vp.cambiarPanel(panel);
+        }
     }
 
     public ControlPrincipal getControl() {

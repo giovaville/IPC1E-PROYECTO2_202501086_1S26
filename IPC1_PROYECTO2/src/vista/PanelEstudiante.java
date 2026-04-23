@@ -10,11 +10,11 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Window;
-import javax.swing.SwingUtilities;
 /**
  *
  * @author Gio
@@ -68,14 +68,7 @@ public class PanelEstudiante extends JPanel {
         cargarDatosPruebaSiHaceFalta();
         mostrarDatos();
 
-        btnRegresar.addActionListener(e -> {
-            Window ventana = SwingUtilities.getWindowAncestor(PanelEstudiante.this);
-
-            if (ventana instanceof VentanaPrincipal) {
-                VentanaPrincipal vp = (VentanaPrincipal) ventana;
-                vp.cambiarPanel(new PanelMenu(control));
-            }
-        });
+        btnRegresar.addActionListener(e -> regresarMenu());
     }
 
     private void cargarDatosPruebaSiHaceFalta() {
@@ -102,5 +95,14 @@ public class PanelEstudiante extends JPanel {
         lblSemestre.setText("Semestre: " + estudiante.getSemestre());
         lblAnio.setText("Año: " + estudiante.getAnio());
         lblDescripcion.setText("Descripción: " + estudiante.getDescripcionProyecto());
+    }
+
+    private void regresarMenu() {
+        Window ventana = SwingUtilities.getWindowAncestor(PanelEstudiante.this);
+
+        if (ventana instanceof VentanaPrincipal) {
+            VentanaPrincipal vp = (VentanaPrincipal) ventana;
+            vp.cambiarPanel(new PanelMenu(control));
+        }
     }
 }

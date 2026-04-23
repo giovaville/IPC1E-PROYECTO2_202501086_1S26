@@ -4,14 +4,15 @@
  */
 package vista;
 import controlador.ControlPrincipal;
+import Estructuras.ListaSimple;
+import modelo.Logro;
 import modelo.UsuarioSistema;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-import javax.swing.BorderFactory;
 import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -30,7 +31,11 @@ public class PanelRecompensas extends JPanel {
     private JLabel lblXP;
     private JLabel lblRango;
 
-    private JPanel panelRecompensas;
+    private JLabel lblLeaderboard;
+    private JLabel lblLogros;
+
+    private javax.swing.JTextArea areaLeaderboard;
+    private javax.swing.JTextArea areaLogros;
 
     private JButton btnRegresar;
 
@@ -39,16 +44,21 @@ public class PanelRecompensas extends JPanel {
 
         setLayout(new BorderLayout());
 
-        lblTitulo = new JLabel("RECOMPENSAS Y PROGRESO", SwingConstants.CENTER);
+        lblTitulo = new JLabel("RECOMPENSAS Y LEADERBOARD", SwingConstants.CENTER);
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 22));
 
         lblNivel = new JLabel();
         lblXP = new JLabel();
         lblRango = new JLabel();
 
-        panelRecompensas = new JPanel();
-        panelRecompensas.setLayout(new GridLayout(0, 1, 10, 10));
-        panelRecompensas.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        lblLeaderboard = new JLabel("Leaderboard", SwingConstants.CENTER);
+        lblLogros = new JLabel("Logros", SwingConstants.CENTER);
+
+        areaLeaderboard = new javax.swing.JTextArea();
+        areaLeaderboard.setEditable(false);
+
+        areaLogros = new javax.swing.JTextArea();
+        areaLogros.setEditable(false);
 
         btnRegresar = new JButton("Regresar al menú");
 
@@ -57,39 +67,77 @@ public class PanelRecompensas extends JPanel {
         panelSuperior.add(lblXP);
         panelSuperior.add(lblRango);
 
+        JPanel panelCentro = new JPanel(new GridLayout(1, 2, 10, 10));
+
+        JPanel panelIzquierdo = new JPanel(new BorderLayout());
+        panelIzquierdo.add(lblLeaderboard, BorderLayout.NORTH);
+        panelIzquierdo.add(new JScrollPane(areaLeaderboard), BorderLayout.CENTER);
+
+        JPanel panelDerecho = new JPanel(new BorderLayout());
+        panelDerecho.add(lblLogros, BorderLayout.NORTH);
+        panelDerecho.add(new JScrollPane(areaLogros), BorderLayout.CENTER);
+
+        panelCentro.add(panelIzquierdo);
+        panelCentro.add(panelDerecho);
+
         add(lblTitulo, BorderLayout.NORTH);
-        add(panelSuperior, BorderLayout.CENTER);
-        add(new JScrollPane(panelRecompensas), BorderLayout.EAST);
+        add(panelSuperior, BorderLayout.WEST);
+        add(panelCentro, BorderLayout.CENTER);
         add(btnRegresar, BorderLayout.SOUTH);
 
-        actualizarDatos();
-        mostrarRecompensas();
+        cargarDatos();
 
         btnRegresar.addActionListener(e -> regresarMenu());
     }
 
-    private void actualizarDatos() {
+    private void cargarDatos() {
         UsuarioSistema usuario = control.getUsuarioActual();
+
+        control.getControlRecompensas().agregarUsuarioAlLeaderboard(usuario);
+        control.getControlRecompensas().ordenarLeaderboardPorXp();
 
         lblNivel.setText("Nivel: " + usuario.getNivel());
         lblXP.setText("XP: " + usuario.getXp());
         lblRango.setText("Rango: " + usuario.getRango());
+
+        cargarLeaderboard();
+        cargarLogros();
     }
 
-    private void mostrarRecompensas() {
-        panelRecompensas.removeAll();
+    private void cargarLeaderboard() {
+        areaLeaderboard.setText("");
 
-        UsuarioSistema usuario = control.getUsuarioActual();
-        int nivel = usuario.getNivel();
+        ListaSimple leaderboard = control.getControlRecompensas().getLeaderboard();
 
-        for (int i = 1; i <= nivel; i++) {
-            JLabel recompensa = new JLabel("Recompensa desbloqueada nivel " + i);
-            recompensa.setBorder(BorderFactory.createEtchedBorder());
-            panelRecompensas.add(recompensa);
+        for (int i = 0; i < leaderboard.size(); i++) {
+            UsuarioSistema usuario = (UsuarioSistema) leaderboard.obtener(i);
+
+            if (usuario != null) {
+                areaLeaderboard.append((i + 1) + ". " +
+                        usuario.getNombre() + " - Nivel " +
+                        usuario.getNivel() + " - XP " +
+                        usuario.getXp() + "\n");
+            }
+        }
+    }
+
+    private void cargarLogros() {
+        areaLogros.setText("");
+
+        ListaSimple logros = control.getUsuarioActual().getLogros();
+
+        if (logros.estaVacia()) {
+            areaLogros.setText("Sin logros desbloqueados todavía.");
+            return;
         }
 
-        panelRecompensas.revalidate();
-        panelRecompensas.repaint();
+        for (int i = 0; i < logros.size(); i++) {
+            Logro logro = (Logro) logros.obtener(i);
+
+            if (logro != null) {
+                areaLogros.append("- " + logro.getNombre() + ": " + logro.getDescripcion() + "\n");
+            }
+        }
     }
 
     private void regresarMenu() {

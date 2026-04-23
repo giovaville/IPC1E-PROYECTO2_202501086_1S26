@@ -6,7 +6,6 @@ package vista;
 import controlador.ControlPrincipal;
 import controlador.ControlReportes;
 import Estructuras.ListaSimple;
-import modelo.Carta;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -35,7 +34,7 @@ public class PanelReportes extends JPanel {
 
     public PanelReportes(ControlPrincipal control) {
         this.control = control;
-        this.controlReportes = new ControlReportes();
+        this.controlReportes = control.getControlReportes();
 
         setLayout(new BorderLayout());
 
@@ -73,13 +72,7 @@ public class PanelReportes extends JPanel {
     }
 
     private void generarReporteAlbum() {
-        ListaSimple cartas = new ListaSimple();
-
-        if (control != null) {
-            // Si tienes acceso real al álbum, luego lo reemplazas
-            // Por ahora lista vacía evita errores
-        }
-
+        ListaSimple cartas = control.getControlAlbum().obtenerCartasDelAlbum();
         controlReportes.generarReporteAlbum(cartas);
     }
 
@@ -89,6 +82,9 @@ public class PanelReportes extends JPanel {
     }
 
     private void generarReporteLeaderboard() {
+        control.getControlRecompensas().agregarUsuarioAlLeaderboard(control.getUsuarioActual());
+        control.getControlRecompensas().ordenarLeaderboardPorXp();
+
         ListaSimple usuarios = control.getControlRecompensas().getLeaderboard();
         controlReportes.generarReporteLeaderboard(usuarios);
     }

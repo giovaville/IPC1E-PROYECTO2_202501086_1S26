@@ -9,7 +9,6 @@ import Estructuras.ListaSimple;
  * @author Gio
  */
 public class Compra {
-
     private String idCompra;
     private String fecha;
     private double total;
@@ -53,6 +52,13 @@ public class Compra {
         return detalles;
     }
 
+    public void setDetalles(ListaSimple detalles) {
+        if (detalles != null) {
+            this.detalles = detalles;
+            recalcularTotal();
+        }
+    }
+
     public void agregarDetalle(DetalleCompra detalle) {
         if (detalle != null) {
             detalles.agregarAlFinal(detalle);
@@ -60,12 +66,29 @@ public class Compra {
         }
     }
 
+    public DetalleCompra obtenerDetalle(int indice) {
+        Object obj = detalles.obtener(indice);
+
+        if (obj instanceof DetalleCompra) {
+            return (DetalleCompra) obj;
+        }
+
+        return null;
+    }
+
+    public int cantidadDetalles() {
+        return detalles.size();
+    }
+
     public void recalcularTotal() {
         total = 0.0;
 
         for (int i = 0; i < detalles.size(); i++) {
-            DetalleCompra d = (DetalleCompra) detalles.obtener(i);
-            total += d.getSubtotal();
+            DetalleCompra detalle = (DetalleCompra) detalles.obtener(i);
+
+            if (detalle != null) {
+                total += detalle.getSubtotal();
+            }
         }
     }
 
