@@ -35,55 +35,60 @@ public class MatrizAlbum {
     }
 
     private void construirMatriz() {
-        NodoMatriz[][] nodos = new NodoMatriz[filas][columnas];
-
-        for (int i = 0; i < filas; i++) {
-            for (int j = 0; j < columnas; j++) {
-                nodos[i][j] = new NodoMatriz(i, j);
-            }
+        if (filas <= 0 || columnas <= 0) {
+            inicio = null;
+            return;
         }
 
+        NodoMatriz filaAnteriorInicio = null;
+
         for (int i = 0; i < filas; i++) {
+            NodoMatriz nodoIzquierdo = null;
+            NodoMatriz nodoArriba = filaAnteriorInicio;
+            NodoMatriz inicioFilaActual = null;
+
             for (int j = 0; j < columnas; j++) {
+                NodoMatriz nuevo = new NodoMatriz(i, j);
 
-                if (i > 0) {
-                    nodos[i][j].setArriba(nodos[i - 1][j]);
+                if (i == 0 && j == 0) {
+                    inicio = nuevo;
                 }
 
-                if (i < filas - 1) {
-                    nodos[i][j].setAbajo(nodos[i + 1][j]);
+                if (j == 0) {
+                    inicioFilaActual = nuevo;
                 }
 
-                if (j > 0) {
-                    nodos[i][j].setIzquierda(nodos[i][j - 1]);
+                if (nodoIzquierdo != null) {
+                    nodoIzquierdo.setDerecha(nuevo);
+                    nuevo.setIzquierda(nodoIzquierdo);
                 }
 
-                if (j < columnas - 1) {
-                    nodos[i][j].setDerecha(nodos[i][j + 1]);
+                if (nodoArriba != null) {
+                    nodoArriba.setAbajo(nuevo);
+                    nuevo.setArriba(nodoArriba);
+                    nodoArriba = nodoArriba.getDerecha();
                 }
+
+                nodoIzquierdo = nuevo;
             }
-        }
 
-        inicio = nodos[0][0];
+            filaAnteriorInicio = inicioFilaActual;
+        }
     }
 
     public NodoMatriz obtenerNodo(int fila, int columna) {
-        if (fila < 0 || fila >= filas || columna < 0 || columna >= columnas) {
+        if (fila < 0 || fila >= filas || columna < 0 || columna >= columnas || inicio == null) {
             return null;
         }
 
         NodoMatriz actual = inicio;
 
         for (int i = 0; i < fila; i++) {
-            if (actual != null) {
-                actual = actual.getAbajo();
-            }
+            actual = actual.getAbajo();
         }
 
         for (int j = 0; j < columna; j++) {
-            if (actual != null) {
-                actual = actual.getDerecha();
-            }
+            actual = actual.getDerecha();
         }
 
         return actual;
@@ -94,15 +99,21 @@ public class MatrizAlbum {
             return false;
         }
 
-        for (int i = 0; i < filas; i++) {
-            for (int j = 0; j < columnas; j++) {
-                NodoMatriz nodo = obtenerNodo(i, j);
+        NodoMatriz filaActual = inicio;
 
-                if (nodo != null && nodo.estaVacio()) {
-                    nodo.setDato(carta);
+        while (filaActual != null) {
+            NodoMatriz actual = filaActual;
+
+            while (actual != null) {
+                if (actual.estaVacio()) {
+                    actual.setDato(carta);
                     return true;
                 }
+
+                actual = actual.getDerecha();
             }
+
+            filaActual = filaActual.getAbajo();
         }
 
         return false;
@@ -116,28 +127,33 @@ public class MatrizAlbum {
             return false;
         }
 
-        Carta temp = nodo1.getDato();
+        Carta temporal = nodo1.getDato();
         nodo1.setDato(nodo2.getDato());
-        nodo2.setDato(temp);
+        nodo2.setDato(temporal);
 
         return true;
     }
 
     public NodoMatriz buscarPorNombre(String nombre) {
-        if (nombre == null) {
+        if (nombre == null || nombre.trim().isEmpty()) {
             return null;
         }
 
-        for (int i = 0; i < filas; i++) {
-            for (int j = 0; j < columnas; j++) {
-                NodoMatriz nodo = obtenerNodo(i, j);
+        NodoMatriz filaActual = inicio;
 
-                if (nodo != null && nodo.getDato() != null) {
-                    if (nodo.getDato().getNombre().equalsIgnoreCase(nombre)) {
-                        return nodo;
-                    }
+        while (filaActual != null) {
+            NodoMatriz actual = filaActual;
+
+            while (actual != null) {
+                if (actual.getDato() != null &&
+                    actual.getDato().getNombre().equalsIgnoreCase(nombre.trim())) {
+                    return actual;
                 }
+
+                actual = actual.getDerecha();
             }
+
+            filaActual = filaActual.getAbajo();
         }
 
         return null;
@@ -148,16 +164,20 @@ public class MatrizAlbum {
             return null;
         }
 
-        for (int i = 0; i < filas; i++) {
-            for (int j = 0; j < columnas; j++) {
-                NodoMatriz nodo = obtenerNodo(i, j);
+        NodoMatriz filaActual = inicio;
 
-                if (nodo != null && nodo.getDato() != null) {
-                    if (nodo.getDato().getTipo() == tipo) {
-                        return nodo;
-                    }
+        while (filaActual != null) {
+            NodoMatriz actual = filaActual;
+
+            while (actual != null) {
+                if (actual.getDato() != null && actual.getDato().getTipo() == tipo) {
+                    return actual;
                 }
+
+                actual = actual.getDerecha();
             }
+
+            filaActual = filaActual.getAbajo();
         }
 
         return null;
@@ -168,30 +188,40 @@ public class MatrizAlbum {
             return null;
         }
 
-        for (int i = 0; i < filas; i++) {
-            for (int j = 0; j < columnas; j++) {
-                NodoMatriz nodo = obtenerNodo(i, j);
+        NodoMatriz filaActual = inicio;
 
-                if (nodo != null && nodo.getDato() != null) {
-                    if (nodo.getDato().getRareza() == rareza) {
-                        return nodo;
-                    }
+        while (filaActual != null) {
+            NodoMatriz actual = filaActual;
+
+            while (actual != null) {
+                if (actual.getDato() != null && actual.getDato().getRareza() == rareza) {
+                    return actual;
                 }
+
+                actual = actual.getDerecha();
             }
+
+            filaActual = filaActual.getAbajo();
         }
 
         return null;
     }
 
     public boolean estaLlena() {
-        for (int i = 0; i < filas; i++) {
-            for (int j = 0; j < columnas; j++) {
-                NodoMatriz nodo = obtenerNodo(i, j);
+        NodoMatriz filaActual = inicio;
 
-                if (nodo != null && nodo.estaVacio()) {
+        while (filaActual != null) {
+            NodoMatriz actual = filaActual;
+
+            while (actual != null) {
+                if (actual.estaVacio()) {
                     return false;
                 }
+
+                actual = actual.getDerecha();
             }
+
+            filaActual = filaActual.getAbajo();
         }
 
         return true;
@@ -199,15 +229,20 @@ public class MatrizAlbum {
 
     public int contarCartas() {
         int contador = 0;
+        NodoMatriz filaActual = inicio;
 
-        for (int i = 0; i < filas; i++) {
-            for (int j = 0; j < columnas; j++) {
-                NodoMatriz nodo = obtenerNodo(i, j);
+        while (filaActual != null) {
+            NodoMatriz actual = filaActual;
 
-                if (nodo != null && nodo.getDato() != null) {
+            while (actual != null) {
+                if (actual.getDato() != null) {
                     contador++;
                 }
+
+                actual = actual.getDerecha();
             }
+
+            filaActual = filaActual.getAbajo();
         }
 
         return contador;

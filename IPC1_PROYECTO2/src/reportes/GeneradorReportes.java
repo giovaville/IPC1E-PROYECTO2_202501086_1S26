@@ -4,11 +4,12 @@
  */
 package reportes;
 import Estructuras.ListaSimple;
-import modelo.Compra;
 import modelo.Carta;
+import modelo.Compra;
 import modelo.TicketVendido;
 import modelo.UsuarioSistema;
 
+import java.awt.Desktop;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -19,116 +20,178 @@ import java.time.format.DateTimeFormatter;
  * @author Gio
  */
 public class GeneradorReportes {
-    private static String generarNombreArchivo(String nombreBase) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-        String fecha = LocalDateTime.now().format(formatter);
-        return nombreBase + "_" + fecha + ".html";
+    private static String generarNombreArchivo(String tipo) {
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd_MM_yyyy_HH_mm_ss");
+        String fecha = LocalDateTime.now().format(formato);
+        return fecha + "_" + tipo + ".html";
     }
 
     private static void abrirArchivo(String ruta) {
         try {
             File archivo = new File(ruta);
-            java.awt.Desktop.getDesktop().browse(archivo.toURI());
+            Desktop.getDesktop().browse(archivo.toURI());
         } catch (Exception e) {
-            System.out.println("No se pudo abrir el archivo");
+            System.out.println("No se pudo abrir el reporte: " + e.getMessage());
         }
     }
 
+    private static String encabezadoHTML(String titulo) {
+        return "<html><head><meta charset='UTF-8'><title>" + titulo + "</title>"
+                + "<style>"
+                + "body{font-family:Arial;background:#f4f4f4;padding:20px;}"
+                + "h1{text-align:center;color:#222;}"
+                + "table{width:100%;border-collapse:collapse;background:white;}"
+                + "th{background:#222;color:white;padding:10px;}"
+                + "td{border:1px solid #ccc;padding:8px;text-align:center;}"
+                + "tr:nth-child(even){background:#eee;}"
+                + "</style></head><body><h1>" + titulo + "</h1>";
+    }
+
+    private static String cierreHTML() {
+        return "</body></html>";
+    }
+
     public static void reporteCompras(ListaSimple compras) {
-        String nombre = generarNombreArchivo("reporte_compras");
+        String nombre = generarNombreArchivo("Ventas");
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(nombre))) {
 
-            bw.write("<html><head><title>Reporte de Compras</title></head><body>");
-            bw.write("<h1>Reporte de Compras</h1>");
-            bw.write("<table border='1'>");
-            bw.write("<tr><th>#</th><th>Detalle</th></tr>");
+            bw.write(encabezadoHTML("Reporte de Ventas"));
+            bw.write("<table>");
+            bw.write("<tr><th>No.</th><th>ID Compra</th><th>Fecha</th><th>Total</th></tr>");
 
             for (int i = 0; i < compras.size(); i++) {
                 Compra compra = (Compra) compras.obtener(i);
-                bw.write("<tr><td>" + (i + 1) + "</td><td>" + compra.toString() + "</td></tr>");
+
+                if (compra != null) {
+                    bw.write("<tr>");
+                    bw.write("<td>" + (i + 1) + "</td>");
+                    bw.write("<td>" + compra.getIdCompra() + "</td>");
+                    bw.write("<td>" + compra.getFecha() + "</td>");
+                    bw.write("<td>Q" + compra.getTotal() + "</td>");
+                    bw.write("</tr>");
+                }
             }
 
-            bw.write("</table></body></html>");
+            bw.write("</table>");
+            bw.write(cierreHTML());
 
         } catch (Exception e) {
-            System.out.println("Error generando reporte de compras");
+            System.out.println("Error generando reporte de ventas: " + e.getMessage());
         }
 
         abrirArchivo(nombre);
     }
 
     public static void reporteAlbum(ListaSimple cartas) {
-        String nombre = generarNombreArchivo("reporte_album");
+        String nombre = generarNombreArchivo("Album");
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(nombre))) {
 
-            bw.write("<html><head><title>Reporte de Álbum</title></head><body>");
-            bw.write("<h1>Cartas del Álbum</h1>");
-            bw.write("<table border='1'>");
-            bw.write("<tr><th>#</th><th>Nombre</th><th>Tipo</th><th>Rareza</th></tr>");
+            bw.write(encabezadoHTML("Reporte de Álbum"));
+            bw.write("<table>");
+            bw.write("<tr><th>No.</th><th>Código</th><th>Nombre</th><th>Tipo</th><th>Rareza</th><th>Ataque</th><th>Defensa</th><th>PS</th></tr>");
 
             for (int i = 0; i < cartas.size(); i++) {
                 Carta carta = (Carta) cartas.obtener(i);
-                bw.write("<tr><td>" + (i + 1) + "</td><td>" + carta.getNombre() +
-                        "</td><td>" + carta.getTipo() +
-                        "</td><td>" + carta.getRareza() + "</td></tr>");
+
+                if (carta != null) {
+                    String estilo = "";
+                    if (carta.getRareza() != null && carta.getRareza().name().equals("LEGENDARIA")) {
+                        estilo = " style='background:#ffd700;'";
+                    }
+
+                    bw.write("<tr" + estilo + ">");
+                    bw.write("<td>" + (i + 1) + "</td>");
+                    bw.write("<td>" + carta.getCodigo() + "</td>");
+                    bw.write("<td>" + carta.getNombre() + "</td>");
+                    bw.write("<td>" + carta.getTipo() + "</td>");
+                    bw.write("<td>" + carta.getRareza() + "</td>");
+                    bw.write("<td>" + carta.getAtaque() + "</td>");
+                    bw.write("<td>" + carta.getDefensa() + "</td>");
+                    bw.write("<td>" + carta.getPs() + "</td>");
+                    bw.write("</tr>");
+                }
             }
 
-            bw.write("</table></body></html>");
+            bw.write("</table>");
+            bw.write(cierreHTML());
 
         } catch (Exception e) {
-            System.out.println("Error generando reporte de álbum");
+            System.out.println("Error generando reporte de álbum: " + e.getMessage());
         }
 
         abrirArchivo(nombre);
     }
 
     public static void reporteTickets(ListaSimple tickets) {
-        String nombre = generarNombreArchivo("reporte_tickets");
+        String nombre = generarNombreArchivo("Torneos");
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(nombre))) {
 
-            bw.write("<html><head><title>Reporte de Tickets</title></head><body>");
-            bw.write("<h1>Tickets Vendidos</h1>");
-            bw.write("<table border='1'>");
-            bw.write("<tr><th>#</th><th>Detalle</th></tr>");
+            bw.write(encabezadoHTML("Reporte de Torneos y Tickets"));
+            bw.write("<table>");
+            bw.write("<tr><th>No.</th><th>ID Ticket</th><th>Torneo</th><th>Comprador</th><th>Fecha Compra</th><th>Precio</th></tr>");
 
             for (int i = 0; i < tickets.size(); i++) {
                 TicketVendido ticket = (TicketVendido) tickets.obtener(i);
-                bw.write("<tr><td>" + (i + 1) + "</td><td>" + ticket.toString() + "</td></tr>");
+
+                if (ticket != null) {
+                    String torneo = "Sin torneo";
+
+                    if (ticket.getTorneo() != null) {
+                        torneo = ticket.getTorneo().getNombre();
+                    }
+
+                    bw.write("<tr>");
+                    bw.write("<td>" + (i + 1) + "</td>");
+                    bw.write("<td>" + ticket.getIdTicket() + "</td>");
+                    bw.write("<td>" + torneo + "</td>");
+                    bw.write("<td>" + ticket.getNombreComprador() + "</td>");
+                    bw.write("<td>" + ticket.getFechaCompra() + "</td>");
+                    bw.write("<td>Q" + ticket.getPrecio() + "</td>");
+                    bw.write("</tr>");
+                }
             }
 
-            bw.write("</table></body></html>");
+            bw.write("</table>");
+            bw.write(cierreHTML());
 
         } catch (Exception e) {
-            System.out.println("Error generando reporte de tickets");
+            System.out.println("Error generando reporte de torneos: " + e.getMessage());
         }
 
         abrirArchivo(nombre);
     }
 
     public static void reporteLeaderboard(ListaSimple usuarios) {
-        String nombre = generarNombreArchivo("reporte_leaderboard");
+        String nombre = generarNombreArchivo("Leaderboard");
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(nombre))) {
 
-            bw.write("<html><head><title>Leaderboard</title></head><body>");
-            bw.write("<h1>Ranking de Usuarios</h1>");
-            bw.write("<table border='1'>");
-            bw.write("<tr><th>#</th><th>Usuario</th><th>Nivel</th><th>XP</th></tr>");
+            bw.write(encabezadoHTML("Reporte de Leaderboard"));
+            bw.write("<table>");
+            bw.write("<tr><th>Posición</th><th>Usuario</th><th>Nivel</th><th>Rango</th><th>XP</th></tr>");
 
             for (int i = 0; i < usuarios.size(); i++) {
-                UsuarioSistema u = (UsuarioSistema) usuarios.obtener(i);
-                bw.write("<tr><td>" + (i + 1) + "</td><td>" + u.getNombre() +
-                        "</td><td>" + u.getNivel() +
-                        "</td><td>" + u.getXp() + "</td></tr>");
+                UsuarioSistema usuario = (UsuarioSistema) usuarios.obtener(i);
+
+                if (usuario != null) {
+                    bw.write("<tr>");
+                    bw.write("<td>" + (i + 1) + "</td>");
+                    bw.write("<td>" + usuario.getNombre() + "</td>");
+                    bw.write("<td>" + usuario.getNivel() + "</td>");
+                    bw.write("<td>" + usuario.getRango() + "</td>");
+                    bw.write("<td>" + usuario.getXp() + "</td>");
+                    bw.write("</tr>");
+                }
             }
 
-            bw.write("</table></body></html>");
+            bw.write("</table>");
+            bw.write(cierreHTML());
 
         } catch (Exception e) {
-            System.out.println("Error generando leaderboard");
+            System.out.println("Error generando reporte de leaderboard: " + e.getMessage());
         }
 
         abrirArchivo(nombre);

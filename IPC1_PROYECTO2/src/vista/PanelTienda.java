@@ -3,13 +3,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package vista;
-import controlador.ControlPrincipal;
 import Estructuras.ListaSimple;
+import controlador.ControlPrincipal;
+import enums.Genero;
+import enums.Plataforma;
 import modelo.Compra;
 import modelo.ItemCarrito;
 import modelo.juego;
-import enums.Genero;
-import enums.Plataforma;
 
 import javax.swing.*;
 import java.awt.*;
@@ -21,13 +21,18 @@ public class PanelTienda extends JPanel {
     private ControlPrincipal control;
 
     private JLabel lblTitulo;
+    private JTextField txtBuscar;
+    private JComboBox<String> cmbGenero;
+    private JComboBox<String> cmbPlataforma;
+
     private JPanel panelCatalogo;
-    private JPanel panelDerecho;
     private DefaultListModel<String> modeloCarrito;
     private JList<String> listaCarrito;
+
     private JLabel lblTotal;
     private JButton btnComprar;
     private JButton btnEliminarSeleccionado;
+    private JButton btnLimpiarFiltros;
     private JButton btnRegresar;
 
     public PanelTienda(ControlPrincipal control) {
@@ -37,6 +42,40 @@ public class PanelTienda extends JPanel {
 
         lblTitulo = new JLabel("TIENDA DE VIDEOJUEGOS", SwingConstants.CENTER);
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 22));
+
+        txtBuscar = new JTextField();
+
+        cmbGenero = new JComboBox<>();
+        cmbGenero.addItem("TODOS");
+        cmbGenero.addItem("ACCION");
+        cmbGenero.addItem("RPG");
+        cmbGenero.addItem("ESTRATEGIA");
+        cmbGenero.addItem("DEPORTES");
+        cmbGenero.addItem("TERROR");
+        cmbGenero.addItem("AVENTURA");
+
+        cmbPlataforma = new JComboBox<>();
+        cmbPlataforma.addItem("TODAS");
+        cmbPlataforma.addItem("PC");
+        cmbPlataforma.addItem("PLAYSTATION");
+        cmbPlataforma.addItem("XBOX");
+        cmbPlataforma.addItem("NINTENDO_SWITCH");
+
+        btnLimpiarFiltros = new JButton("Limpiar filtros");
+
+        JPanel panelFiltros = new JPanel(new GridLayout(2, 4, 10, 10));
+        panelFiltros.add(new JLabel("Buscar:"));
+        panelFiltros.add(txtBuscar);
+        panelFiltros.add(new JLabel("Género:"));
+        panelFiltros.add(cmbGenero);
+        panelFiltros.add(new JLabel("Plataforma:"));
+        panelFiltros.add(cmbPlataforma);
+        panelFiltros.add(new JLabel(""));
+        panelFiltros.add(btnLimpiarFiltros);
+
+        JPanel panelSuperior = new JPanel(new BorderLayout());
+        panelSuperior.add(lblTitulo, BorderLayout.NORTH);
+        panelSuperior.add(panelFiltros, BorderLayout.CENTER);
 
         panelCatalogo = new JPanel();
         panelCatalogo.setLayout(new GridLayout(0, 2, 10, 10));
@@ -53,39 +92,45 @@ public class PanelTienda extends JPanel {
         btnEliminarSeleccionado = new JButton("Eliminar seleccionado");
         btnRegresar = new JButton("Regresar al menú");
 
-        panelDerecho = new JPanel();
-        panelDerecho.setLayout(new BorderLayout());
+        JPanel panelBotonesCarrito = new JPanel(new GridLayout(4, 1, 10, 10));
+        panelBotonesCarrito.add(lblTotal);
+        panelBotonesCarrito.add(btnComprar);
+        panelBotonesCarrito.add(btnEliminarSeleccionado);
+        panelBotonesCarrito.add(btnRegresar);
 
-        JPanel panelBotones = new JPanel();
-        panelBotones.setLayout(new GridLayout(4, 1, 10, 10));
-        panelBotones.add(lblTotal);
-        panelBotones.add(btnComprar);
-        panelBotones.add(btnEliminarSeleccionado);
-        panelBotones.add(btnRegresar);
-
+        JPanel panelDerecho = new JPanel(new BorderLayout());
         panelDerecho.add(new JLabel("CARRITO", SwingConstants.CENTER), BorderLayout.NORTH);
         panelDerecho.add(new JScrollPane(listaCarrito), BorderLayout.CENTER);
-        panelDerecho.add(panelBotones, BorderLayout.SOUTH);
+        panelDerecho.add(panelBotonesCarrito, BorderLayout.SOUTH);
 
-        add(lblTitulo, BorderLayout.NORTH);
+        add(panelSuperior, BorderLayout.NORTH);
         add(scrollCatalogo, BorderLayout.CENTER);
         add(panelDerecho, BorderLayout.EAST);
 
         cargarDatosPruebaSiHaceFalta();
-        cargarCatalogoVisual();
+        cargarCatalogoVisual(control.getControlTienda().getCatalogo());
         actualizarCarritoVisual();
+
+        txtBuscar.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent e) {
+                aplicarFiltros();
+            }
+        });
+
+        cmbGenero.addActionListener(e -> aplicarFiltros());
+        cmbPlataforma.addActionListener(e -> aplicarFiltros());
+
+        btnLimpiarFiltros.addActionListener(e -> {
+            txtBuscar.setText("");
+            cmbGenero.setSelectedIndex(0);
+            cmbPlataforma.setSelectedIndex(0);
+            cargarCatalogoVisual(control.getControlTienda().getCatalogo());
+        });
 
         btnComprar.addActionListener(e -> confirmarCompra());
         btnEliminarSeleccionado.addActionListener(e -> eliminarSeleccionado());
-
-        btnRegresar.addActionListener(e -> {
-            Window ventana = SwingUtilities.getWindowAncestor(PanelTienda.this);
-
-            if (ventana instanceof VentanaPrincipal) {
-                VentanaPrincipal vp = (VentanaPrincipal) ventana;
-                vp.cambiarPanel(new PanelMenu(control));
-            }
-        });
+        btnRegresar.addActionListener(e -> regresarMenu());
     }
 
     private void cargarDatosPruebaSiHaceFalta() {
@@ -102,13 +147,46 @@ public class PanelTienda extends JPanel {
             control.getControlTienda().agregarJuegoAlCatalogo(
                     new juego("J004", "Age of Empires", Genero.ESTRATEGIA, 250.0, Plataforma.PC, 6, "Juego de estrategia")
             );
+            control.getControlTienda().agregarJuegoAlCatalogo(
+                    new juego("J005", "Final Fantasy", Genero.RPG, 500.0, Plataforma.PLAYSTATION, 4, "Juego RPG")
+            );
         }
     }
 
-    private void cargarCatalogoVisual() {
-        panelCatalogo.removeAll();
+    private void aplicarFiltros() {
+        ListaSimple filtrados = new ListaSimple();
+
+        String texto = txtBuscar.getText().trim().toLowerCase();
+        String genero = cmbGenero.getSelectedItem().toString();
+        String plataforma = cmbPlataforma.getSelectedItem().toString();
 
         ListaSimple catalogo = control.getControlTienda().getCatalogo();
+
+        for (int i = 0; i < catalogo.size(); i++) {
+            juego actual = (juego) catalogo.obtener(i);
+
+            if (actual != null) {
+                boolean coincideTexto = texto.isEmpty()
+                        || actual.getNombre().toLowerCase().contains(texto)
+                        || actual.getCodigo().toLowerCase().contains(texto);
+
+                boolean coincideGenero = genero.equals("TODOS")
+                        || actual.getGenero().name().equals(genero);
+
+                boolean coincidePlataforma = plataforma.equals("TODAS")
+                        || actual.getPlataforma().name().equals(plataforma);
+
+                if (coincideTexto && coincideGenero && coincidePlataforma) {
+                    filtrados.agregarAlFinal(actual);
+                }
+            }
+        }
+
+        cargarCatalogoVisual(filtrados);
+    }
+
+    private void cargarCatalogoVisual(ListaSimple catalogo) {
+        panelCatalogo.removeAll();
 
         for (int i = 0; i < catalogo.size(); i++) {
             juego juegoActual = (juego) catalogo.obtener(i);
@@ -155,17 +233,13 @@ public class PanelTienda extends JPanel {
         Compra compra = control.getControlTienda().confirmarCompra(control.getUsuarioActual());
 
         if (compra != null) {
-            control.getControlRecompensas().otorgarXp(
-                    control.getUsuarioActual(),
-                    0
-            );
             control.getControlRecompensas().registrarLogroManual(
                     control.getUsuarioActual(),
                     "Comprador"
             );
 
             actualizarCarritoVisual();
-            cargarCatalogoVisual();
+            aplicarFiltros();
 
             JOptionPane.showMessageDialog(this, "Compra realizada con éxito.\n" + compra.toString());
         } else {
@@ -188,6 +262,15 @@ public class PanelTienda extends JPanel {
             JOptionPane.showMessageDialog(this, "Elemento eliminado del carrito.");
         } else {
             JOptionPane.showMessageDialog(this, "No se pudo eliminar el elemento.");
+        }
+    }
+
+    private void regresarMenu() {
+        Window ventana = SwingUtilities.getWindowAncestor(PanelTienda.this);
+
+        if (ventana instanceof VentanaPrincipal) {
+            VentanaPrincipal vp = (VentanaPrincipal) ventana;
+            vp.cambiarPanel(new PanelMenu(control));
         }
     }
 }
