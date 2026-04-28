@@ -32,6 +32,7 @@ public class PanelTienda extends JPanel {
     private JLabel lblTotal;
     private JButton btnComprar;
     private JButton btnEliminarSeleccionado;
+    private JButton btnModificarCantidad;
     private JButton btnLimpiarFiltros;
     private JButton btnRegresar;
 
@@ -89,12 +90,14 @@ public class PanelTienda extends JPanel {
         lblTotal.setFont(new Font("Arial", Font.BOLD, 16));
 
         btnComprar = new JButton("Confirmar compra");
+        btnModificarCantidad = new JButton("Modificar cantidad");
         btnEliminarSeleccionado = new JButton("Eliminar seleccionado");
         btnRegresar = new JButton("Regresar al menú");
 
-        JPanel panelBotonesCarrito = new JPanel(new GridLayout(4, 1, 10, 10));
+        JPanel panelBotonesCarrito = new JPanel(new GridLayout(5, 1, 10, 10));
         panelBotonesCarrito.add(lblTotal);
         panelBotonesCarrito.add(btnComprar);
+        panelBotonesCarrito.add(btnModificarCantidad);
         panelBotonesCarrito.add(btnEliminarSeleccionado);
         panelBotonesCarrito.add(btnRegresar);
 
@@ -129,6 +132,7 @@ public class PanelTienda extends JPanel {
         });
 
         btnComprar.addActionListener(e -> confirmarCompra());
+        btnModificarCantidad.addActionListener(e -> modificarCantidad());
         btnEliminarSeleccionado.addActionListener(e -> eliminarSeleccionado());
         btnRegresar.addActionListener(e -> regresarMenu());
     }
@@ -244,6 +248,47 @@ public class PanelTienda extends JPanel {
             JOptionPane.showMessageDialog(this, "Compra realizada con éxito.\n" + compra.toString());
         } else {
             JOptionPane.showMessageDialog(this, "No se pudo realizar la compra.");
+        }
+    }
+
+    private void modificarCantidad() {
+        int indice = listaCarrito.getSelectedIndex();
+
+        if (indice < 0) {
+            JOptionPane.showMessageDialog(this, "Selecciona un elemento del carrito.");
+            return;
+        }
+
+        ItemCarrito item = (ItemCarrito) control.getControlTienda().getCarrito().obtener(indice);
+
+        if (item == null || item.getJuego() == null) {
+            JOptionPane.showMessageDialog(this, "No se pudo obtener el item.");
+            return;
+        }
+
+        String cantidadTexto = JOptionPane.showInputDialog(this, "Nueva cantidad:");
+
+        if (cantidadTexto == null || cantidadTexto.trim().isEmpty()) {
+            return;
+        }
+
+        try {
+            int nuevaCantidad = Integer.parseInt(cantidadTexto.trim());
+
+            boolean actualizado = control.getControlTienda().actualizarCantidadCarrito(
+                    item.getJuego().getCodigo(),
+                    nuevaCantidad
+            );
+
+            if (actualizado) {
+                actualizarCarritoVisual();
+                JOptionPane.showMessageDialog(this, "Cantidad actualizada.");
+            } else {
+                JOptionPane.showMessageDialog(this, "Cantidad inválida o stock insuficiente.");
+            }
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "La cantidad debe ser numérica.");
         }
     }
 

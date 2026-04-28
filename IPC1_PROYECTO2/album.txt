@@ -1,0 +1,5 @@
+1|Dragon Rojo|FUEGO|RARA|90|70|100|dragon.png
+2|Tortuga Marina|AGUA|COMUN|40|60|80|tortuga.png
+3|Guerrero Bosque|PLANTA|POCO_COMUN|55|50|75|bosque.png
+4|Rayo Azul|ELECTRICO|ULTRA_RARA|100|65|95|rayo.png
+5|Sombra Nocturna|OSCURO|LEGENDARIA|120|95|110|sombra.png

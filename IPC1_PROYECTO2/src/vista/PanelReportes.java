@@ -3,9 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package vista;
+import Estructuras.ListaSimple;
 import controlador.ControlPrincipal;
 import controlador.ControlReportes;
-import Estructuras.ListaSimple;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -26,9 +26,10 @@ public class PanelReportes extends JPanel {
 
     private JLabel lblTitulo;
 
-    private JButton btnReporteCompras;
+    private JButton btnReporteInventario;
+    private JButton btnReporteVentas;
     private JButton btnReporteAlbum;
-    private JButton btnReporteTickets;
+    private JButton btnReporteTorneos;
     private JButton btnReporteLeaderboard;
     private JButton btnRegresar;
 
@@ -38,35 +39,43 @@ public class PanelReportes extends JPanel {
 
         setLayout(new BorderLayout());
 
-        lblTitulo = new JLabel("REPORTES", SwingConstants.CENTER);
+        lblTitulo = new JLabel("REPORTES HTML", SwingConstants.CENTER);
         lblTitulo.setFont(new Font("Arial", Font.BOLD, 22));
 
-        btnReporteCompras = new JButton("Reporte de Compras");
+        btnReporteInventario = new JButton("Reporte de Inventario");
+        btnReporteVentas = new JButton("Reporte de Ventas");
         btnReporteAlbum = new JButton("Reporte de Álbum");
-        btnReporteTickets = new JButton("Reporte de Tickets");
+        btnReporteTorneos = new JButton("Reporte de Torneos");
         btnReporteLeaderboard = new JButton("Reporte de Leaderboard");
         btnRegresar = new JButton("Regresar al menú");
 
         JPanel panelBotones = new JPanel();
-        panelBotones.setLayout(new GridLayout(5, 1, 10, 10));
+        panelBotones.setLayout(new GridLayout(6, 1, 10, 10));
 
-        panelBotones.add(btnReporteCompras);
+        panelBotones.add(btnReporteInventario);
+        panelBotones.add(btnReporteVentas);
         panelBotones.add(btnReporteAlbum);
-        panelBotones.add(btnReporteTickets);
+        panelBotones.add(btnReporteTorneos);
         panelBotones.add(btnReporteLeaderboard);
         panelBotones.add(btnRegresar);
 
         add(lblTitulo, BorderLayout.NORTH);
         add(panelBotones, BorderLayout.CENTER);
 
-        btnReporteCompras.addActionListener(e -> generarReporteCompras());
+        btnReporteInventario.addActionListener(e -> generarReporteInventario());
+        btnReporteVentas.addActionListener(e -> generarReporteVentas());
         btnReporteAlbum.addActionListener(e -> generarReporteAlbum());
-        btnReporteTickets.addActionListener(e -> generarReporteTickets());
+        btnReporteTorneos.addActionListener(e -> generarReporteTorneos());
         btnReporteLeaderboard.addActionListener(e -> generarReporteLeaderboard());
         btnRegresar.addActionListener(e -> regresarMenu());
     }
 
-    private void generarReporteCompras() {
+    private void generarReporteInventario() {
+        ListaSimple catalogo = control.getControlTienda().getCatalogo();
+        controlReportes.generarReporteInventario(catalogo);
+    }
+
+    private void generarReporteVentas() {
         ListaSimple compras = control.getUsuarioActual().getCompras();
         controlReportes.generarReporteCompras(compras);
     }
@@ -76,7 +85,7 @@ public class PanelReportes extends JPanel {
         controlReportes.generarReporteAlbum(cartas);
     }
 
-    private void generarReporteTickets() {
+    private void generarReporteTorneos() {
         ListaSimple tickets = control.getControlTorneos().getTicketsVendidos();
         controlReportes.generarReporteTickets(tickets);
     }

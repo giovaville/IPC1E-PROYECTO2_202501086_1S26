@@ -8,6 +8,7 @@ import modelo.Carta;
 import modelo.Compra;
 import modelo.TicketVendido;
 import modelo.UsuarioSistema;
+import modelo.juego;
 
 import java.awt.Desktop;
 import java.io.BufferedWriter;
@@ -22,8 +23,7 @@ import java.time.format.DateTimeFormatter;
 public class GeneradorReportes {
     private static String generarNombreArchivo(String tipo) {
         DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd_MM_yyyy_HH_mm_ss");
-        String fecha = LocalDateTime.now().format(formato);
-        return fecha + "_" + tipo + ".html";
+        return LocalDateTime.now().format(formato) + "_" + tipo + ".html";
     }
 
     private static void abrirArchivo(String ruta) {
@@ -43,7 +43,8 @@ public class GeneradorReportes {
                 + "table{width:100%;border-collapse:collapse;background:white;}"
                 + "th{background:#222;color:white;padding:10px;}"
                 + "td{border:1px solid #ccc;padding:8px;text-align:center;}"
-                + "tr:nth-child(even){background:#eee;}"
+                + ".vacia{background:#d9d9d9;}"
+                + ".legendaria{background:#ffd700;}"
                 + "</style></head><body><h1>" + titulo + "</h1>";
     }
 
@@ -51,11 +52,45 @@ public class GeneradorReportes {
         return "</body></html>";
     }
 
+    public static void reporteInventario(ListaSimple catalogo) {
+        String nombre = generarNombreArchivo("Inventario");
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(nombre))) {
+            bw.write(encabezadoHTML("Reporte de Inventario de Tienda"));
+            bw.write("<table>");
+            bw.write("<tr><th>No.</th><th>Código</th><th>Nombre</th><th>Género</th><th>Plataforma</th><th>Precio</th><th>Stock</th><th>Descripción</th></tr>");
+
+            for (int i = 0; i < catalogo.size(); i++) {
+                juego j = (juego) catalogo.obtener(i);
+
+                if (j != null) {
+                    bw.write("<tr>");
+                    bw.write("<td>" + (i + 1) + "</td>");
+                    bw.write("<td>" + j.getCodigo() + "</td>");
+                    bw.write("<td>" + j.getNombre() + "</td>");
+                    bw.write("<td>" + j.getGenero() + "</td>");
+                    bw.write("<td>" + j.getPlataforma() + "</td>");
+                    bw.write("<td>Q" + j.getPrecio() + "</td>");
+                    bw.write("<td>" + j.getStock() + "</td>");
+                    bw.write("<td>" + j.getDescripcion() + "</td>");
+                    bw.write("</tr>");
+                }
+            }
+
+            bw.write("</table>");
+            bw.write(cierreHTML());
+
+        } catch (Exception e) {
+            System.out.println("Error generando reporte de inventario: " + e.getMessage());
+        }
+
+        abrirArchivo(nombre);
+    }
+
     public static void reporteCompras(ListaSimple compras) {
         String nombre = generarNombreArchivo("Ventas");
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(nombre))) {
-
             bw.write(encabezadoHTML("Reporte de Ventas"));
             bw.write("<table>");
             bw.write("<tr><th>No.</th><th>ID Compra</th><th>Fecha</th><th>Total</th></tr>");
@@ -87,7 +122,6 @@ public class GeneradorReportes {
         String nombre = generarNombreArchivo("Album");
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(nombre))) {
-
             bw.write(encabezadoHTML("Reporte de Álbum"));
             bw.write("<table>");
             bw.write("<tr><th>No.</th><th>Código</th><th>Nombre</th><th>Tipo</th><th>Rareza</th><th>Ataque</th><th>Defensa</th><th>PS</th></tr>");
@@ -96,12 +130,13 @@ public class GeneradorReportes {
                 Carta carta = (Carta) cartas.obtener(i);
 
                 if (carta != null) {
-                    String estilo = "";
+                    String clase = "";
+
                     if (carta.getRareza() != null && carta.getRareza().name().equals("LEGENDARIA")) {
-                        estilo = " style='background:#ffd700;'";
+                        clase = " class='legendaria'";
                     }
 
-                    bw.write("<tr" + estilo + ">");
+                    bw.write("<tr" + clase + ">");
                     bw.write("<td>" + (i + 1) + "</td>");
                     bw.write("<td>" + carta.getCodigo() + "</td>");
                     bw.write("<td>" + carta.getNombre() + "</td>");
@@ -128,7 +163,6 @@ public class GeneradorReportes {
         String nombre = generarNombreArchivo("Torneos");
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(nombre))) {
-
             bw.write(encabezadoHTML("Reporte de Torneos y Tickets"));
             bw.write("<table>");
             bw.write("<tr><th>No.</th><th>ID Ticket</th><th>Torneo</th><th>Comprador</th><th>Fecha Compra</th><th>Precio</th></tr>");
@@ -168,7 +202,6 @@ public class GeneradorReportes {
         String nombre = generarNombreArchivo("Leaderboard");
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(nombre))) {
-
             bw.write(encabezadoHTML("Reporte de Leaderboard"));
             bw.write("<table>");
             bw.write("<tr><th>Posición</th><th>Usuario</th><th>Nivel</th><th>Rango</th><th>XP</th></tr>");

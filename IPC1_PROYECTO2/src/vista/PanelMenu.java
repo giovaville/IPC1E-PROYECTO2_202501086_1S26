@@ -64,7 +64,18 @@ public class PanelMenu extends JPanel {
         btnRecompensas.addActionListener(e -> abrirPanel(new PanelRecompensas(control)));
         btnReportes.addActionListener(e -> abrirPanel(new PanelReportes(control)));
         btnEstudiante.addActionListener(e -> abrirPanel(new PanelEstudiante(control)));
-        btnSalir.addActionListener(e -> System.exit(0));
+        btnSalir.addActionListener(e -> {
+    Window ventana = SwingUtilities.getWindowAncestor(this);
+
+    if (ventana instanceof VentanaPrincipal) {
+        ((VentanaPrincipal) ventana).dispatchEvent(
+                new java.awt.event.WindowEvent(
+                        (VentanaPrincipal) ventana,
+                        java.awt.event.WindowEvent.WINDOW_CLOSING
+                )
+        );
+    }
+});
     }
 
     private void abrirPanel(JPanel panel) {

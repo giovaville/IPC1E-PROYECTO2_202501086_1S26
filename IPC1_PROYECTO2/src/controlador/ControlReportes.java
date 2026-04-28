@@ -13,6 +13,12 @@ public class ControlReportes {
     public ControlReportes() {
     }
 
+    public void generarReporteInventario(ListaSimple catalogo) {
+        if (catalogo != null) {
+            GeneradorReportes.reporteInventario(catalogo);
+        }
+    }
+
     public void generarReporteCompras(ListaSimple compras) {
         if (compras != null) {
             GeneradorReportes.reporteCompras(compras);
